@@ -1,0 +1,22 @@
+{
+  "name": "teespring-creator-growth-github-summarize-code-for-zapier",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bot.js",
+  "dependencies": {
+    "cross-fetch": "^3.0.2",
+    "node-fetch": "^2.3.0",
+    "graphql": "^14.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-react": "^7.11.0"
+  },
+  "author": "Bogdan Vitoc",
+  "engines": {
+    "node": ">=8.0.0"
+  }
+}
