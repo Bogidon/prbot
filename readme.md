@@ -1,8 +1,6 @@
 # Zapier-GitHub-Slack "PRbot"
 
-- queries GitHub API for PRs maked with provided labels.
-- feeds output to Zapier to be sent to Slack as bot.
-- at Teespring we use it to make sure we don't lose PRs:
+Queries GitHub API for PRs maked with provided labels and feeds output to Zapier to be sent to Slack as bot. At Teespring we use it to make sure we don't lose PRs and to have a place for transient discussions via Slack threads (comments of lasting value are still put on GitHub):
 
 ![usage example](images/usage_example.png)
 
