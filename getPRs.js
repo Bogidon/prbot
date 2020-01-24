@@ -4,7 +4,8 @@ const fetch = require('cross-fetch');
 const inputData = { // https://zapier.com/help/code/#data-variables
   githubAPIToken: '<TOKEN>',
   labels: '<LABEL 1>, <LABEL 2>, <LABEL N>', // Case-insensitive
-  repos: '<REPO 1>, <REPO 2>, <REPO N>'
+  repos: '<REPO 1>, <REPO 2>, <REPO N>',
+  owner: '<GITHUB_OWNER_USERNAME>'
 };
 
 const callback = (err, output) => { // https://zapier.com/help/code/#utilities
@@ -13,7 +14,7 @@ const callback = (err, output) => { // https://zapier.com/help/code/#utilities
 };
 
 // Copy to Zapier from here:
-const { githubAPIToken } = inputData;
+const { githubAPIToken, owner } = inputData;
 let { labels: labelNames, repos } = inputData;
 labelNames = labelNames.split(',').map(l => l.trim());
 repos = repos.split(',').map(r => r.trim());
@@ -21,7 +22,7 @@ repos = repos.split(',').map(r => r.trim());
 const fetchLabels = async (repository) => {
   const query = `
     query {
-      repository(owner: "Teespring", name: "${repository}") {
+      repository(owner: "${owner}", name: "${repository}") {
         pullRequests(last: 100, labels: ${JSON.stringify(labelNames)}, states: OPEN) {
           nodes {
             title
