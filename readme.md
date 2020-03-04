@@ -4,6 +4,12 @@ Finds GitHub PRs marked with provided labels and feeds them to Zapier (e.g. to b
 
 ![usage example](images/usage_example.png)
 
+## Configuration
+- `githubAPIToken`: required
+- `labels`: required, but can be an empty string in which case all prs (that are not drafts) will be returned
+- `repos`: required, list of repositories
+- `owner`: required, the github account
+
 ### Running locally
 
 1. `npm install`

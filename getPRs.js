@@ -16,19 +16,20 @@ const callback = (err, output) => { // https://zapier.com/help/code/#utilities
 // Copy to Zapier from here:
 const { githubAPIToken, owner } = inputData;
 let { labels: labelNames, repos } = inputData;
-labelNames = labelNames.split(',').map(l => l.trim());
+labelNames = (labelNames || '').split(',').map(l => l.trim()).filter(s => s.length > 0);
 repos = repos.split(',').map(r => r.trim());
 
-const fetchLabels = async (repository) => {
+const fetchPullRequests = async (repository) => {
   const query = `
     query {
       repository(owner: "${owner}", name: "${repository}") {
-        pullRequests(last: 100, labels: ${JSON.stringify(labelNames)}, states: OPEN) {
+        pullRequests(last: 100, labels: ${labelNames.length > 0 ? JSON.stringify(labelNames) : null}, states: OPEN) {
           nodes {
             title
             state
             number
             url
+            isDraft
             labels(first: 10) {
               nodes {
                 name
@@ -43,7 +44,7 @@ const fetchLabels = async (repository) => {
     method: 'POST',
     headers: {
       Authorization: `bearer ${githubAPIToken}`,
-      Accept: 'application/json',
+      Accept: 'application/json, application/vnd.github.shadow-cat-preview+json', // Shadow-cat-preview allows getting draft PRs while in beta
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
@@ -72,11 +73,19 @@ const mergePRArrays = (responses) => {
   return flatMap(x => x.data.repository.pullRequests.nodes, responses);
 };
 
+const removeDraftPRs = (prsIn) => {
+  return prsIn.filter(pr => pr.isDraft !== true);
+};
+
 // GitHub can only OR a set of labels, this makes sure only PRs that
 // include ALL labels are matched.
-const onlyPrsWithLabels = (labels) => {
+const onlyPrsWithLabels = (labels = []) => {
   return (prsIn) => {
+    if (labels.length === 0) {
+      return prsIn;
+    }
     return prsIn.filter((pr) => {
+      // The AND condition
       const allLabels = pr.labels.nodes.map(labelNode => labelNode.name.toLowerCase());
       return labels.every(l => allLabels.includes(l.toLowerCase()));
     }).filter((prA, idxA, prs) => {
@@ -87,11 +96,12 @@ const onlyPrsWithLabels = (labels) => {
 };
 
 Promise.all(repos.map((r) => {
-  return fetchLabels(r)
+  return fetchPullRequests(r)
     .then(checkStatus)
     .then(parseJSON);
 }))
   .then(mergePRArrays)
+  .then(removeDraftPRs)
   .then(onlyPrsWithLabels(labelNames))
   .then(res => callback(undefined, res))
   .catch(err => callback(err, undefined));
