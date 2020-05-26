@@ -6,9 +6,12 @@ Finds GitHub PRs marked with provided labels and feeds them to Zapier (e.g. to b
 
 ## Configuration
 - `githubAPIToken`: required
-- `labels`: required, but can be an empty string in which case all prs (that are not drafts) will be returned
+- `labels`: optional
+- `excludeLabels`: optional
 - `repos`: required, list of repositories
 - `owner`: required, the github account
+
+* Draft PRs are always exclued
 
 ### Running locally
 

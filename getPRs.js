@@ -15,9 +15,12 @@ const callback = (err, output) => { // https://zapier.com/help/code/#utilities
 
 // Copy to Zapier from here:
 const { githubAPIToken, owner } = inputData;
-let { labels: labelNames, repos } = inputData;
-labelNames = (labelNames || '').split(',').map(l => l.trim()).filter(s => s.length > 0);
+let { labels: labelNames, excludeLabels: excludeLabelNames, repos } = inputData;
 repos = repos.split(',').map(r => r.trim());
+
+const importLabels = labelString => (labelString || '').split(',').map(l => l.trim()).filter(s => s.length > 0);
+labelNames = importLabels(labelNames);
+excludeLabelNames = importLabels(excludeLabelNames);
 
 const fetchPullRequests = async (repository) => {
   const query = `
@@ -86,11 +89,23 @@ const onlyPrsWithLabels = (labels = []) => {
     }
     return prsIn.filter((pr) => {
       // The AND condition
-      const allLabels = pr.labels.nodes.map(labelNode => labelNode.name.toLowerCase());
-      return labels.every(l => allLabels.includes(l.toLowerCase()));
+      const prLabels = pr.labels.nodes.map(labelNode => labelNode.name.toLowerCase());
+      return labels.every(l => prLabels.includes(l.toLowerCase()));
     }).filter((prA, idxA, prs) => {
       const idxB = prs.findIndex(prB => prB.number === prA.number);
       return idxA === idxB;
+    });
+  };
+};
+
+const excludePRsWithLabels = (excludeLabels = []) => {
+  return (prsIn) => {
+    if (excludeLabels.length === 0) {
+      return prsIn;
+    }
+    return prsIn.filter((pr) => {
+      const prLabels = pr.labels.nodes.map(labelNode => labelNode.name.toLowerCase());
+      return !excludeLabels.some(l => prLabels.includes(l.toLowerCase()));
     });
   };
 };
@@ -103,5 +118,6 @@ Promise.all(repos.map((r) => {
   .then(mergePRArrays)
   .then(removeDraftPRs)
   .then(onlyPrsWithLabels(labelNames))
+  .then(excludePRsWithLabels(excludeLabelNames))
   .then(res => callback(undefined, res))
   .catch(err => callback(err, undefined));
