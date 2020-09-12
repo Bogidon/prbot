@@ -5,7 +5,7 @@
   "main": "bot.js",
   "dependencies": {
     "cross-fetch": "^3.0.2",
-    "node-fetch": "^2.3.0",
+    "node-fetch": "^2.6.1",
     "graphql": "^14.2.1"
   },
   "devDependencies": {
